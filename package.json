@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "server for game",
   "author": "micmic",
-
   "repository": {
     "type": "git",
     "url": "https://github.com/micmic0615/game.git"
@@ -11,10 +10,13 @@
   "main": "server.js",
   "license": "MIT",
   "dependencies": {
-    "mongoose": "^4.2.4",
+    "ejs": "^2.5.2",
     "express": "^4.13.3",
     "express-session": "^1.12.1",
     "glob": "^6.0.1",
+    "moment": "^2.15.0",
+    "mongoose": "^4.2.4",
+    "sha1": "^1.1.1",
     "socket.io": "^1.4.5"
   }
 }

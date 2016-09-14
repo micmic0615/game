@@ -1,0 +1,14 @@
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+	ye
+<script>
+	var socket = io('http://localhost:9090');
+
+	socket.on("connect", function(data){
+		alert(data)
+	})
+
+	socket.on('user_connect', function (data) {
+		console.log(data.message);
+		socket.emit('user_login', { message: 'an admin has logged in' });
+	});
+</script>
