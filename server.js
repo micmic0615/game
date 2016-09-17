@@ -1,63 +1,48 @@
 var SERVER = function(){
-	this.app = require('express')();
-	this.uuid = require('./app/controllers/uuid.js');
-	this.moment = require('moment')(); 
-	this.mongoose = require('mongoose');
-	this.cols = {};
-	this.http = require("http").Server(this.app);
-	this.io = require('socket.io')(this.http);
+	var PRM = this;
+	var glob = require('glob');
+	var moment = require('moment')(); 
+	var uuid = require('./app/controllers/uuid.js');
+	
+	PRM.cols = {};
+	PRM.app = require('express')();
+	PRM.http = require("http").Server(PRM.app);
+	PRM.io = require('socket.io')(PRM.http);
+	PRM.mongoose = require('mongoose');
+	PRM.clone_obj = require('./app/controllers/clone_obj.js');
 
-	this.config = {
+	PRM.config = {
 		port: 9090,
 		views:'app/views/',
 		db: 'mongodb://localhost/game_server'
 	}
 
-	this.mongoose.connect(this.config.db );
+	PRM.app.set('views', './' + PRM.config.views);
+	PRM.app.set('view engine', 'ejs');
+	PRM.app.get("/", function(req, res){res.render("index.ejs")});
 
-	this.app.set('views', './' + this.config.views);
-	this.app.set('view engine', 'ejs');
-	this.app.get("/", function(req, res){res.render("index.ejs")});
+	PRM.mongoose.connect(PRM.config.db );
+	PRM.mongoose.connection.on('open', function(ref) {
+		PRM.cols.users = PRM.mongoose.model("users", require('./app/models/users.js').bind(PRM)());
+		PRM.cols.games = PRM.mongoose.model("games", require('./app/models/games.js').bind(PRM)());
 
-	
-	this.mongoose.connection.on('open', function(ref) {
-		this.cols.users = this.mongoose.model("users", require('./app/models/users.js').bind(this)());
-
-		this.io.on('connection', function (socket) {
-			socket.on('req.user_login', function (data) { 
-				
-				if (data._id != undefined){
-					this.cols.users.findById(data._id, function(err, user){
-						if (user != undefined && user != null){
-							socket.join("abc123");
-							socket.emit('res.user_login', user);
-						} else {
-							var user = new this.cols.users()
-							user.generate(data, function(){
-								socket.join("abc123");
-								socket.emit('res.user_login', user);
-							})
-						}
-					})
-				} else {
-					var user = new this.cols.users()
-					user.generate(data, function(){
-						socket.join("abc123");
-						socket.emit('res.user_login', user);
-					})
+		glob("*app/controllers/sockets/*.js", function(err, files){
+			PRM.io.on('connection', function (socket) {
+				PRM.socket = socket;
+				for (var i = 0; i < files.length; ++i) {
+					var file = files[i];
+					run_socket(file, file.split("/sockets/")[1].split(".")[0]);
 				}
-			}.bind(this));
 
+				function run_socket(file, listener){
+					socket.on('req.' + listener, function(data){require('./'+file)().bind(PRM)(data, listener)}.bind(PRM))
+				}
+			});
 
-			socket.on('req.select_buff', function (data) { 
-				console.log(data)
-				this.io.to("abc123").emit('res.select_buff', {user:data.user, buff:data.buff});
-			}.bind(this))
-		}.bind(this));
-
-		this.http.listen(this.config.port);
-		console.log(this.moment.format('MMMM Do YYYY, h:mm:ss a') +  " -  server running at http://localhost:" + this.config.port);
-	}.bind(this))
+			PRM.http.listen(PRM.config.port);
+			console.log(moment.format('MMMM Do YYYY, h:mm:ss a') +  " -  server running at http://localhost:" + PRM.config.port);
+		})
+	})
 }
 
 module.exports = new SERVER();
