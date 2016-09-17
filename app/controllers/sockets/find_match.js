@@ -12,8 +12,8 @@ module.exports = function(){return function(data, emitter){var PRM = this;
 				game.save(function(){
 					PRM.socket.join(game_id);
 
-					calc_turn.initialize(game_id, function(turn_data){
-						PRM.io.to(game_id).emit('res.'+ emitter + ".found", {game_id: game_id, turn_data: turn_data});
+					calc_turn.initialize(game_id, 0, function(turn_data){
+						PRM.io.to(game_id).emit('res.'+ emitter + ".found", {game: game, turn_data: turn_data});
 					});
 				})	
 			} else {
