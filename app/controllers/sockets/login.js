@@ -4,9 +4,14 @@ module.exports = function(PRM, socket){
 		if (data._id != undefined){
 			PRM.cols.users.findById(data._id, function(err, user){
 				if (user != undefined && user != null){
-					var user_id = user._id;
-					socket.join(user_id);
-					PRM.io.to(user_id).emit('res.user_login', user);
+					user.name = data.name;
+					user.markModified("name");
+
+					user.save(function(){
+						var user_id = user._id;
+						socket.join(user_id);
+						PRM.io.to(user_id).emit('res.user_login', user);
+					});					
 				} else {
 					var user = new PRM.cols.users()
 					var user_id = user._id;
