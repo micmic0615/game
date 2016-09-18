@@ -9,7 +9,7 @@ module.exports = function(PRM, socket){
 
 	socket.on('req.game_buff_eval', function(data){
 		calc_turn.update_buffs(data.game_id, data.game_index, data.user_id, data.prebuffs, function(turn_data){
-			PRM.io.to(data.game_id).emit('res.game_buff_eval', turn_data);
+			PRM.io.to(data.game_id).emit('res.game_buff_eval', {turn_data: turn_data, index: data.game_index + 1});
 		})
 	})
 
