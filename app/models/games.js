@@ -4,6 +4,7 @@ module.exports = function() {
 
 	var rooms = new Schema({
 		status: String,
+		winner_id: String,
 		user_num: Number,
 		date_time: String,
 		user_data: Array,
@@ -16,6 +17,7 @@ module.exports = function() {
 		this.user_data = [];
 		this.turn_data = [];
 		this.status = "waiting";
+		this.winner_id = "-";
 
 		this.save(func);
 	};

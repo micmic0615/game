@@ -1,32 +1,43 @@
-module.exports = function(){return function(data, emitter){var PRM = this;	
-	var calc_turn = require("../gameplay/turns.js")(PRM);
+module.exports = function(PRM, socket){
+	socket.on('req.find_match', function(data){
+		PRM.cols.users.findById(data._id, function(err, user){
+			PRM.cols.games.findOne({$and:[{user_num: 1}, {status: "waiting"}]}, function(err, game){
+				if (game != undefined && game != null){
+					var game_id = String(game._id);
 
-	PRM.cols.users.findById(data._id, function(err, user){
-		PRM.cols.games.findOne({user_num: 1}, function(err, game){
-			if (game != undefined && game != null ){
-				game.user_num = 2;
-				game.user_data.push(data);
-				game.status = "playing";
+					if (game.user_data[0]._id != data._id){
+						socket.join(game_id);
+						game.user_num = 2;
+						game.user_data.push(data);
+						game.status = "playing";
+						
+						game.save(function(){					
+							PRM.io.to(game_id).emit('res.find_match.found', {game: game, turn_data: []});
+						})	
+					} else {
+						socket.leave(game_id);
+						PRM.cols.games.findByIdAndRemove(game_id, function(err){create_room()});
+					}
+				} else {
+					create_room();
+				}
 
-				var game_id = String(game._id);
-				game.save(function(){
-					PRM.socket.join(game_id);
-
-					calc_turn.initialize(game_id, 0, function(turn_data){
-						PRM.io.to(game_id).emit('res.'+ emitter + ".found", {game: game, turn_data: turn_data});
-					});
-				})	
-			} else {
-				var game = new PRM.cols.games();
-				game.generate();
-				game.user_data.push(data);
-
-				var game_id = String(game._id);
-				game.save(function(){
-					PRM.socket.join(game_id);	
-					PRM.io.to(game_id).emit('res.'+ emitter + ".finding", user);
-				})		
-			}
+				function create_room(){
+					var game = new PRM.cols.games();
+					var game_id = String(game._id);
+					game.generate();
+					game.user_data.push(data);
+						
+					game.save(function(){
+						socket.join(game_id);
+						PRM.io.to(game_id).emit('res.find_match.finding', user);
+					})		
+				}
+			})
 		})
 	})
-}}
+
+	socket.on('req.find_match.ready', function(game_id){
+		PRM.io.to(game_id).emit('res.find_match.ready', 'game start!');
+	})
+}

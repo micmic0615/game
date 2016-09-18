@@ -26,17 +26,9 @@ var SERVER = function(){
 		PRM.cols.users = PRM.mongoose.model("users", require('./app/models/users.js').bind(PRM)());
 		PRM.cols.games = PRM.mongoose.model("games", require('./app/models/games.js').bind(PRM)());
 
-		glob("*app/controllers/sockets/*.js", function(err, files){
+		glob("*app/controllers/sockets/*.js", function(err, socket_files){
 			PRM.io.on('connection', function (socket) {
-				PRM.socket = socket;
-				for (var i = 0; i < files.length; ++i) {
-					var file = files[i];
-					run_socket(file, file.split("/sockets/")[1].split(".")[0]);
-				}
-
-				function run_socket(file, listener){
-					socket.on('req.' + listener, function(data){require('./'+file)().bind(PRM)(data, listener)}.bind(PRM))
-				}
+				for (var i = 0; i < socket_files.length; ++i) {require("./" + socket_files[i])(PRM, socket)};
 			});
 
 			PRM.http.listen(PRM.config.port);
