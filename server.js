@@ -12,7 +12,7 @@ var SERVER = function(){
 	PRM.clone_obj = require('./app/controllers/clone_obj.js');
 
 	PRM.config = {
-		port: 9090,
+		port: 9000,
 		views:'app/views/',
 		db: 'mongodb://localhost/game_server'
 	}
