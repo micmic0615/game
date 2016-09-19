@@ -1,6 +1,5 @@
 module.exports = function(PRM, socket){
 	socket.on('req.game_buff_send', function(data){
-		console.log(data)
 		PRM.io.to(data.game_id).emit('res.game_buff_send', {
 			turn_index: data.turn_index + 1, 
 			seed_index: data.seed_index + 1, 
