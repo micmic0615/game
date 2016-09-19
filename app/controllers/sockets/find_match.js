@@ -11,8 +11,10 @@ module.exports = function(PRM, socket){
 						game.user_data.push(data);
 						game.status = "playing";
 						
-						game.save(function(){					
-							PRM.io.to(game_id).emit('res.find_match.found', {game: game, turn_data: []});
+						game.save(function(){		
+							var random_seed = [];
+							while(random_seed.length < 1000){random_seed.push(Math.round(Math.random()*1000)/1000)};
+							PRM.io.to(game_id).emit('res.find_match.found', {game: game, turn_data: [], random_seed: random_seed});
 						})	
 					} else {
 						socket.leave(game_id);

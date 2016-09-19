@@ -1,17 +1,13 @@
 module.exports = function(PRM, socket){
-	var calc_turn = require("../gameplay/turns.js")(PRM);
-
-	socket.on('req.game_extend', function(data){
-		calc_turn.initialize(data.game_id, data.game_index, function(turn_data){
-			PRM.io.to(data.game_id).emit('res.game_extend', turn_data);
-		})
-	})
-
-	socket.on('req.game_buff_eval', function(data){
-		calc_turn.update_buffs(data.game_id, data.game_index, data.user_id, data.prebuffs, function(turn_data){
-			PRM.io.to(data.game_id).emit('res.game_buff_eval', {turn_data: turn_data, index: data.game_index + 1});
-		})
-	})
+	socket.on('req.game_buff_send', function(data){
+		console.log(data)
+		PRM.io.to(data.game_id).emit('res.game_buff_send', {
+			turn_index: data.turn_index + 1, 
+			seed_index: data.seed_index + 1, 
+			unit_alias: data.unit_alias,
+			buffs: data.buffs
+		});
+	});
 
 	socket.on('req.game_end', function(data){
 		PRM.cols.games.findById(data.game_id, function(err, game){
@@ -31,5 +27,5 @@ module.exports = function(PRM, socket){
 
 	socket.on('req.game_disconnect', function(game_id){
 		socket.leave(game_id);
-	})
+	});
 }
