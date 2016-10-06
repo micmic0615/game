@@ -13,9 +13,6 @@ module.exports = function(PRM, socket){
 				game.end_signals[game_end_keys[i]] = false;				
 			}
 
-			console.log("===")
-			console.log(game.end_signals)
-
 			game.markModified("end_signals");
 			game.save(function(){});
 		});
@@ -31,11 +28,7 @@ module.exports = function(PRM, socket){
 				var p = game.end_signals[game_end_keys[i]];
 				if (p == false){valid = false};
 			}
-
-			console.log("---")
-			console.log(game_end_keys)
-			console.log(game.end_signals)
-
+			
 			if (valid){
 				game.status = "done";
 				game.markModified("status");
