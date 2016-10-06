@@ -8,7 +8,8 @@ module.exports = function() {
 		user_num: Number,
 		date_time: String,
 		user_data: Array,
-		turn_data: Array
+		turn_data: Array,
+		end_signals: Object
 	});
 
 	rooms.methods.generate = function(data, func){

@@ -6,21 +6,46 @@ module.exports = function(PRM, socket){
 			unit_alias: data.unit_alias,
 			buffs: data.buffs
 		});
+
+		PRM.cols.games.findById(data.game_id, function(err, game){
+			var game_end_keys = Object.keys(game.end_signals);
+			for (var i = 0; i < game_end_keys.length; ++i) {
+				game.end_signals[game_end_keys[i]] = false;				
+			}
+
+			game.markModified("end_signals");
+			game.save(function(){});
+		});
 	});
 
 	socket.on('req.game_end', function(data){
 		PRM.cols.games.findById(data.game_id, function(err, game){
-			game.status = "done";
-			game.markModified("status");
+			// game.status = "done";
+			var valid = true;
+			game.end_signals[data.user_id] = true;
 
-			if (data.winner_id != undefined){
-				game.winner_id = data.winner_id;
-				game.markModified("winner_id");
-			};
+			var game_end_keys = Object.keys(game.end_signals);
+			for (var i = 0; i < game_end_keys.length; ++i) {
+				var p = game.end_signals[game_end_keys[i]];
+				if (p == false){valid = false};
+			}
 
-			game.save(function(){
-				PRM.io.to(data.game_id).emit('res.game_end', "end_game");
-			})
+			if (valid){
+				game.markModified("status");
+				game.markModified("end_signals");
+
+				if (data.winner_id != undefined){
+					game.winner_id = data.winner_id;
+					game.markModified("winner_id");
+				};
+
+				game.save(function(){
+					PRM.io.to(data.game_id).emit('res.game_end', "end_game");
+				})
+			} else {
+				game.markModified("end_signals");
+				game.save();
+			}		
 		})
 	})
 

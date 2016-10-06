@@ -9,6 +9,7 @@ module.exports = function(PRM, socket){
 						socket.join(game_id);
 						game.user_num = 2;
 						game.user_data.push(data);
+						game.end_signals[data._id] = false;
 						game.status = "playing";
 						
 						game.save(function(){		
@@ -29,6 +30,7 @@ module.exports = function(PRM, socket){
 					var game_id = String(game._id);
 					game.generate();
 					game.user_data.push(data);
+					game.end_signals[data._id] = false;
 						
 					game.save(function(){
 						socket.join(game_id);
