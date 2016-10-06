@@ -17,6 +17,7 @@ module.exports = function() {
 		this.date_time = new Date().getTime();
 		this.user_data = [];
 		this.turn_data = [];
+		this.end_signals = {};
 		this.status = "waiting";
 		this.winner_id = "-";
 
