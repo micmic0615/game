@@ -12,6 +12,11 @@ module.exports = function(PRM, socket){
 						game.end_signals[data._id] = false;
 						game.status = "playing";
 						
+						game.markModified("user_num");
+						game.markModified("user_data");
+						game.markModified("end_signals");
+						game.markModified("status");
+						
 						game.save(function(){		
 							var random_seed = [];
 							while(random_seed.length < 1000){random_seed.push(Math.round(Math.random()*1000)/1000)};
